@@ -1,6 +1,12 @@
 package org.example;
+
 public class Student {
-    private final int id;
-    private final String name;
-    public Student(int id, String n) { this.id = id; name = n; }
+    private String name;
+    public Student(String name) {
+        this.name = name;
+    }
+    @Override
+    public String toString() {
+        return name;
+    }
 }
