@@ -1,98 +1,118 @@
 package org.example;
-import java.util.Iterator;
-
-public class MyHashTable<K, V> implements Iterable<MyHashTable.HashNode<K, V>> {
-    static final class HashNode<K, V> {
+public class MyHashTable<K, V> {
+    private static class HashNode<K, V> {
         K key;
         V value;
         HashNode<K, V> next;
-        HashNode(K k, V v) { key = k; value = v; }
+        HashNode(K key, V value) {
+            this.key = key;
+            this.value = value;
+        }
+        @Override
+        public String toString() {
+            return "{" + key + ", " + value + "}";
+        }
     }
-
-    private final HashNode<K, V>[] table;
-    private final int m = 997;
+    private HashNode<K, V>[] chainArray;
+    private int M = 11;
     private int size;
-
     @SuppressWarnings("unchecked")
-    public MyHashTable() { table = (HashNode<K, V>[]) new HashNode[m]; }
-
-    private int hash(K k) {
-        int h = k.hashCode();
-        return (h < 0 ? -h : h) % m;
+    public MyHashTable() {
+        chainArray = (HashNode<K, V>[]) new HashNode[M];
+        size = 0;
     }
-
-    public void put(K k, V v) {
-        int i = hash(k);
-        for (HashNode<K, V> x = table[i]; x != null; x = x.next)
-            if (x.key.equals(k)) { x.value = v; return; }
-        HashNode<K, V> n = new HashNode<>(k, v);
-        n.next = table[i];
-        table[i] = n;
+    @SuppressWarnings("unchecked")
+    public MyHashTable(int M) {
+        this.M = M;
+        chainArray = (HashNode<K, V>[]) new HashNode[M];
+        size = 0;
+    }
+    private int hash(K key) {
+        return (key.hashCode() & 0x7fffffff) % M;
+    }
+    public void put(K key, V value) {
+        int index = hash(key);
+        HashNode<K, V> node = chainArray[index];
+        while (node != null) {
+            if (node.key.equals(key)) {
+                node.value = value;
+                return;
+            }
+            node = node.next;
+        }
+        HashNode<K, V> newNode = new HashNode<>(key, value);
+        newNode.next = chainArray[index];
+        chainArray[index] = newNode;
         size++;
     }
-
-    public V get(K k) {
-        int i = hash(k);
-        for (HashNode<K, V> x = table[i]; x != null; x = x.next)
-            if (x.key.equals(k)) return x.value;
-        return null;
-    }
-
-    public V remove(K k) {
-        int i = hash(k);
-        HashNode<K, V> p = null, x = table[i];
-        while (x != null) {
-            if (x.key.equals(k)) {
-                if (p == null) table[i] = x.next; else p.next = x.next;
-                size--;
-                return x.value;
+    public V get(K key) {
+        int index = hash(key);
+        HashNode<K, V> node = chainArray[index];
+        while (node != null) {
+            if (node.key.equals(key)) {
+                return node.value;
             }
-            p = x; x = x.next;
+            node = node.next;
         }
-        return null;
+        return null; // Key not found
     }
-
-    public boolean contains(V v) {
-        for (HashNode<K, V> b : table)
-            for (HashNode<K, V> x = b; x != null; x = x.next)
-                if (x.value.equals(v)) return true;
+    public V remove(K key) {
+        int index = hash(key);
+        HashNode<K, V> node = chainArray[index];
+        HashNode<K, V> prev = null;
+        while (node != null) {
+            if (node.key.equals(key)) {
+                if (prev == null) {
+                    chainArray[index] = node.next;
+                } else {
+                    prev.next = node.next;
+                }
+                size--;
+                return node.value;
+            }
+            prev = node;
+            node = node.next;
+        }
+        return null; // Key not found
+    }
+    public boolean contains(V value) {
+        for (int i = 0; i < M; i++) {
+            HashNode<K, V> node = chainArray[i];
+            while (node != null) {
+                if (node.value.equals(value)) {
+                    return true;
+                }
+                node = node.next;
+            }
+        }
         return false;
     }
-
-    public K getKey(V v) {
-        for (HashNode<K, V> b : table)
-            for (HashNode<K, V> x = b; x != null; x = x.next)
-                if (x.value.equals(v)) return x.key;
-        return null;
-    }
-
-    public int size() { return size; }
-
-    public int[] bucketSizes() {
-        int[] a = new int[m];
-        for (int i = 0; i < m; i++) {
-            int c = 0;
-            for (HashNode<K, V> x = table[i]; x != null; x = x.next) c++;
-            a[i] = c;
+    public K getKey(V value) {
+        for (int i = 0; i < M; i++) {
+            HashNode<K, V> node = chainArray[i];
+            while (node != null) {
+                if (node.value.equals(value)) {
+                    return node.key;
+                }
+                node = node.next;
+            }
         }
-        return a;
+        return null; // Value not found
     }
-
-    public Iterator<HashNode<K, V>> iterator() {
-        return new Iterator<>() {
-            int b;
-            HashNode<K, V> cur = table[0];
-            private void advance() {
-                while (cur == null && ++b < m) cur = table[b];
+    public int size() {
+        return size;
+    }
+    public int[] bucketSizes() {
+        int[] sizes = new int[M];
+        for (int i = 0; i < M; i++) {
+            int count = 0;
+            HashNode<K, V> node = chainArray[i];
+            while (node != null) {
+                count++;
+                node = node.next;
             }
-            { advance(); }
-            public boolean hasNext() { return cur != null; }
-            public HashNode<K, V> next() {
-                HashNode<K, V> r = cur;
-                cur = cur.next;
-                if (cur == null) advance();
-                return r;
-            }
-        };
+            sizes[i] = count;
+        }
+        return sizes;
     }
 }
