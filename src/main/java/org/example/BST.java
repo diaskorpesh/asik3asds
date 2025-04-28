@@ -1,7 +1,7 @@
 package org.example;
 import java.util.Iterator;
 import java.util.Stack;
-public class BinarySearchTree<K extends Comparable<K>, V> implements Iterable<BinarySearchTree.Entry<K, V>> {
+public class BST<K extends Comparable<K>, V> implements Iterable<BST.Entry<K, V>> {
     private class Node {
         K key;
         V value;
