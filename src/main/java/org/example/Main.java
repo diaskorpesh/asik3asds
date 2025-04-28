@@ -11,12 +11,12 @@ public class Main {
         for (int i = 0; i < bucketSizes.length; i++) {
             System.out.println("Bucket " + i + ": " + bucketSizes[i]);
         }
-        BinarySearchTree<Integer, String> tree = new BinarySearchTree<>();
+        BST<Integer, String> tree = new BST<>();
         for (int i = 0; i < 20; i++) {
             tree.put(i, "v" + i);
         }
         System.out.println("\nTree size: " + tree.size());
-        for (BinarySearchTree.Entry<Integer, String> elem : tree) {
+        for (BST.Entry<Integer, String> elem : tree) {
             System.out.println("key is " + elem.getKey() + " and value is " + elem.getValue());
         }
     }
