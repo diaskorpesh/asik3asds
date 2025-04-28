@@ -1,13 +1,21 @@
 package org.example;
 public class MyTestingClass {
-    private final int id;
-    public MyTestingClass(int id) { this.id = id; }
-    public int hashCode() {
-        int h = id;
-        h ^= (h >>> 20) ^ (h >>> 12);
-        return h ^ (h >>> 7) ^ (h >>> 4);
+    private int id;
+    public MyTestingClass(int id) {
+        this.id = id;
     }
-    public boolean equals(Object o) {
-        return o instanceof MyTestingClass t && t.id == id;
+    @Override
+    public int hashCode() {
+        int hash = 17;
+        hash = 31 * hash + id;
+        hash = hash ^ (hash >>> 16);
+        return hash;
+    }
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        MyTestingClass other = (MyTestingClass) obj;
+        return id == other.id;
     }
 }
